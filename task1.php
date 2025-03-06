@@ -1,5 +1,4 @@
 <?php
-
 class Node {
     public $data;
     public $prev;
@@ -21,15 +20,15 @@ class DoublyLinkedList {
         $this->tail = null;
     }
 
-    public function append($data) {
+    public function prepend($data) {
         $newNode = new Node($data);
         if ($this->head === null) {
             $this->head = $newNode;
             $this->tail = $newNode;
         } else {
-            $newNode->prev = $this->tail;
-            $this->tail->next = $newNode;
-            $this->tail = $newNode;
+            $newNode->next = $this->head;
+            $this->head->prev = $newNode;
+            $this->head = $newNode;
         }
     }
 
@@ -50,36 +49,42 @@ function integerToLinkedList($n) {
     $n = abs($n);
 
     if ($n == 0) {
-        $dll->append(0);
+        $dll->prepend(0);
     } else {
+        // Extract digits and store them in an array
+        $digits = [];
         while ($n > 0) {
-            $digit = $n % 10;
-            $dll->append($digit);
+            $digits[] = $n % 10;
             $n = intdiv($n, 10);
+        }
+        // Prepend digits in reverse order (most significant digit first)
+        for ($i = count($digits) - 1; $i >= 0; $i--) {
+            $dll->prepend($digits[$i]);
         }
     }
 
     if ($isNegative) {
-        $dll->append('-');
+        $dll->prepend('-');
     }
 
     return $dll;
 }
 
 function linkedListToInteger($dll) {
-    $current = $dll->tail;
+    $current = $dll->head;
     $number = 0;
-    $multiplier = 1;
     $isNegative = false;
 
+    // Handle negative sign
+    if ($current->data === '-') {
+        $isNegative = true;
+        $current = $current->next;
+    }
+
+    // Construct the number
     while ($current !== null) {
-        if ($current->data === '-') {
-            $isNegative = true;
-        } else {
-            $number += $current->data * $multiplier;
-            $multiplier *= 10;
-        }
-        $current = $current->prev;
+        $number = $number * 10 + $current->data;
+        $current = $current->next;
     }
 
     return $isNegative ? -$number : $number;
